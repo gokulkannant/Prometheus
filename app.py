@@ -1,22 +1,29 @@
 import streamlit as st
 import yt_dlp
 import os
+import re
 
 def progress_hook(d):
     if d['status'] == 'downloading':
-        p = d['_percent_str'].strip('%')
-        st.session_state.progress_bar.progress(float(p) / 100)
+        percent_str = d['_percent_str']
+        percent_clean = re.sub(r'\x1b\[[0-9;]*m', '', percent_str).strip('%')  # Remove ANSI codes
+        try:
+            progress = float(percent_clean) / 100
+            st.session_state.progress_bar.progress(progress)
+        except ValueError:
+            pass  # Ignore if conversion fails
 
 def download_video(url, format_option, quality):
     options = {
         'format': quality if format_option == 'Video' else 'bestaudio',
-        'outtmpl': 'downloaded_video.%(ext)s',
         'progress_hooks': [progress_hook],
     }
     
     with yt_dlp.YoutubeDL(options) as ydl:
         info = ydl.extract_info(url, download=True)
-        return ydl.prepare_filename(info)
+        file_name = f"{info['title']}.{'mp4' if format_option == 'Video' else 'mp3'}"
+        os.rename(ydl.prepare_filename(info), file_name)
+        return file_name
 
 st.title("YouTube Video Downloader")
 
@@ -39,7 +46,7 @@ if st.button("Download"):
                 st.download_button(
                     label="Download File",
                     data=file,
-                    file_name=os.path.basename(file_path),
+                    file_name=file_path,
                     mime="video/mp4" if format_option == "Video" else "audio/mpeg"
                 )
             
