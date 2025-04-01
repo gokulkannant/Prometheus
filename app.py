@@ -17,6 +17,7 @@ def download_video(url, format_option, file_format):
     options = {
         'format': f"bestvideo+bestaudio/best[ext={file_format}]" if format_option == 'Video' else f"bestaudio[ext={file_format}]",
         'progress_hooks': [progress_hook],
+        'cookies': 'cookies.txt'
     }
     
     with yt_dlp.YoutubeDL(options) as ydl:
