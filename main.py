@@ -62,16 +62,21 @@ async def send_and_wait_for_cloud_link(command):
                         eta = "Unknown"
 
                     bar = build_bar(percent_val)
-                    progress_line = f"{phase}: {filename}\n{bar} {percent_val:.2f}% | ETA: {eta}"
+                    progress_line = (
+                                        f"\n📦 {phase} Progress\n"
+                                        f"📄 File: {filename}\n"
+                                        f"{bar} {percent_val:.2f}% | ETA: {eta}"
+                                                    )
+
 
                     if progress_line != last_progress:
                         os.system('cls' if os.name == 'nt' else 'clear')
                         print(progress_line)
                         last_progress = progress_line
-                else:
+                #else:
                     # DEBUG: Print message to help improve the match
-                    if "Download" in msg.text or "Upload" in msg.text:
-                        print("⚠️ No regex match. Message content:\n", msg.text)
+                    #if "Download" in msg.text or "Upload" in msg.text:
+                        #print("⚠️ No regex match. Message content:\n", msg.text)
 
             await asyncio.sleep(1)
 
