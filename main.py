@@ -17,7 +17,8 @@ PROGRESS_REGEX = re.compile(
     r"\[.+?\]\s+(\d{1,3}\.\d+%)",                       # Group 3 = percent
     re.MULTILINE
 )
-ETA_REGEX = re.compile(r"ETA:\s*([^\s]+)", re.IGNORECASE)
+ETA_REGEX = re.compile(r"ETA:\s*(.+?)(?:\s*\||\n|$)", re.IGNORECASE)
+
 
 def build_bar(percent: float, width: int = 24) -> str:
     done = int(width * percent / 100)
@@ -32,7 +33,11 @@ async def send_and_wait_for_cloud_link(command):
         print("📤 Command sent. Waiting for progress and cloud link...\n")
         last_progress = ""
 
+        spin_index = 0
+
         while True:
+            spinner = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
+            
             async for msg in client.iter_messages(bot_username, min_id=sent_id, reverse=False):
                 # ✅ Check for cloud link
                 if msg.buttons:
@@ -63,20 +68,28 @@ async def send_and_wait_for_cloud_link(command):
 
                     bar = build_bar(percent_val)
                     progress_line = (
-                                        f"\n📦 {phase} Progress\n"
-                                        f"📄 File: {filename}\n"
-                                        f"{bar} {percent_val:.2f}% | ETA: {eta}"
-                                                    )
+                    f"\n📦 {phase} Progress\n"
+                    f"📄 File: {filename}\n"
+                    f"{bar} {percent_val:.2f}% | ETA: {eta}"
+                    )
 
 
                     if progress_line != last_progress:
                         os.system('cls' if os.name == 'nt' else 'clear')
                         print(progress_line)
                         last_progress = progress_line
-                #else:
+                else:
                     # DEBUG: Print message to help improve the match
-                    #if "Download" in msg.text or "Upload" in msg.text:
-                        #print("⚠️ No regex match. Message content:\n", msg.text)
+                    if "Download" in msg.text or "Upload" in msg.text:
+                        lines = msg.text.splitlines()
+                    # Try to grab the filename from the first line
+                        if lines:
+                            filename_line = lines[0]
+                            print(f"{spinner[spin_index % len(spinner)]} Waiting for update... File: {filename_line}")
+                            spin_index += 1
+
+                        else:
+                            print("⚠️ Waiting for update...")
 
             await asyncio.sleep(1)
 
