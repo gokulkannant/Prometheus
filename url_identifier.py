@@ -2,7 +2,7 @@ from urllib.parse import urlparse
 
 YTDL_DOMAINS = ["youtube.com", "youtu.be", "vimeo.com", "dailymotion.com", "soundcloud.com"]
 TORRENT_KEYWORDS = ["magnet:?", ".torrent"]
-DIRECT_EXTENSIONS = [".zip", ".rar", ".7z", ".pdf", ".exe", ".mp4", ".mkv", ".apk", ".tar.gz", ".deb"]
+DIRECT_EXTENSIONS = [".zip", ".rar", ".7z", ".pdf", ".exe", ".mp4", ".mkv", ".apk", ".tar.gz", ".deb",".bin"]
 
 def identify_url_type(url: str) -> str:
     url = url.strip()
